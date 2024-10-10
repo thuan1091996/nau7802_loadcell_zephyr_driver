@@ -405,7 +405,8 @@ static int nau7802_loadcell_channel_get(const struct device *dev, enum sensor_ch
 	}
 
 	/* convert the ADC value to force value */
-	uval = (float32_t)(data->sample) * data->calibration_factor + data->zero_offset;
+	uval = (float32_t) ((data->sample) - data->zero_offset) * data->calibration_factor;
+	/* Convert the float value to sensor_value*/
 	sensor_value_from_float(val, uval);
 
 	return 0;
