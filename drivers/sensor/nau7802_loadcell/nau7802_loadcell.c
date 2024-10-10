@@ -506,10 +506,22 @@ static int nau7802_loadcell_init(const struct device *dev)
 	data->zero_offset = 0;
 	data->calibration_factor = 1;
 
+	// Take 10 readings to flush out readings
+	for (int i = 0; i < 10; i++) {
+		k_sleep(K_MSEC(10));
+		nau7802_loadcell_sample_fetch(dev, SENSOR_CHAN_ALL);
+	}
+
 	/* Conduct internal calibration*/
-	ret = nau7802_IntCalibration(config, NAU7802_CALMOD_OFFSET);
+	ret = nau7802_IntCalibration(config, NAU7802_CALMOD_INTERNAL);
 	if (ret != 0) {
 		LOG_ERR("ret:%d, Internal Calibration failed", ret);
+		return ret;
+	}
+
+	ret = nau7802_IntCalibration(config, NAU7802_CALMOD_OFFSET);
+	if (ret != 0) {
+		LOG_ERR("ret:%d, Offset Calibration failed", ret);
 		return ret;
 	}
 
